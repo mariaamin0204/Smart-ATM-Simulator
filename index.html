@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NeoBank 3D Interactive ATM</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+  <div class="atm-container">
+    <!-- ATM Top Banner -->
+    <div class="atm-header">
+      <div class="bank-logo">
+        <i class="fa-solid fa-building-columns"></i> NEO BANK
+      </div>
+      <div class="card-slot-wrapper">
+        <div class="card-slot" id="cardSlot">
+          <div class="card-indicator" id="cardIndicator"></div>
+          <div class="atm-card" id="atmCard">
+            <span>NEO CARD</span>
+            <i class="fa-solid fa-microchip"></i>
+          </div>
+        </div>
+        <small>Insert Card / Tap</small>
+      </div>
+    </div>
+
+    <!-- ATM Digital Screen -->
+    <div class="atm-screen-frame">
+      <div class="screen-header">
+        <span id="screenTime">00:00 AM</span>
+        <span>ATM ID: #7890-PK</span>
+      </div>
+
+      <div class="screen-body" id="screenBody">
+        <!-- Screen 1: Welcome / PIN Screen -->
+        <div class="screen-view active" id="view-pin">
+          <h2>WELCOME TO NEO BANK</h2>
+          <p>Please enter your 4-Digit PIN to continue</p>
+          <div class="pin-display" id="pinDisplay">----</div>
+          <p class="hint-text">(Default PIN: <span>1234</span>)</p>
+          <div class="error-msg" id="pinError"></div>
+        </div>
+
+        <!-- Screen 2: Main Menu -->
+        <div class="screen-view" id="view-menu">
+          <h3>SELECT TRANSACTION</h3>
+          <div class="menu-grid">
+            <button class="menu-btn" onclick="switchView('withdraw')"><i class="fa-solid fa-money-bill-transfer"></i> Withdraw</button>
+            <button class="menu-btn" onclick="switchView('deposit')"><i class="fa-solid fa-piggy-bank"></i> Deposit</button>
+            <button class="menu-btn" onclick="switchView('balance')"><i class="fa-solid fa-wallet"></i> Balance</button>
+            <button class="menu-btn" onclick="switchView('statement')"><i class="fa-solid fa-file-invoice-dollar"></i> Statement</button>
+            <button class="menu-btn" onclick="switchView('pinchange')"><i class="fa-solid fa-key"></i> Change PIN</button>
+            <button class="menu-btn danger" onclick="ejectCard()"><i class="fa-solid fa-right-from-bracket"></i> Exit</button>
+          </div>
+        </div>
+
+        <!-- Screen 3: Withdraw -->
+        <div class="screen-view" id="view-withdraw">
+          <h3>CASH WITHDRAWAL</h3>
+          <div class="quick-amounts">
+            <button onclick="quickWithdraw(500)">$500</button>
+            <button onclick="quickWithdraw(1000)">$1000</button>
+            <button onclick="quickWithdraw(2000)">$2000</button>
+          </div>
+          <div class="custom-input-box">
+            <label>Or Enter Custom Amount:</label>
+            <input type="number" id="withdrawInput" placeholder="e.g. 1500" readonly>
+          </div>
+          <div class="screen-actions">
+            <button class="action-btn back" onclick="switchView('menu')">Back</button>
+            <button class="action-btn confirm" onclick="processWithdrawal()">Confirm</button>
+          </div>
+        </div>
+
+        <!-- Screen 4: Deposit -->
+        <div class="screen-view" id="view-deposit">
+          <h3>DEPOSIT CASH</h3>
+          <div class="custom-input-box">
+            <label>Enter Cash Amount:</label>
+            <input type="number" id="depositInput" placeholder="e.g. 5000" readonly>
+          </div>
+          <div class="screen-actions">
+            <button class="action-btn back" onclick="switchView('menu')">Back</button>
+            <button class="action-btn confirm" onclick="processDeposit()">Deposit</button>
+          </div>
+        </div>
+
+        <!-- Screen 5: Balance -->
+        <div class="screen-view" id="view-balance">
+          <h3>ACCOUNT BALANCE</h3>
+          <div class="balance-card">
+            <span>Current Available Balance</span>
+            <h1 id="balanceDisplay">$0.00</h1>
+          </div>
+          <div class="screen-actions">
+            <button class="action-btn back" onclick="switchView('menu')">Back to Menu</button>
+          </div>
+        </div>
+
+        <!-- Screen 6: Statement -->
+        <div class="screen-view" id="view-statement">
+          <h3>MINI STATEMENT</h3>
+          <div class="statement-list" id="statementList"></div>
+          <div class="screen-actions">
+            <button class="action-btn back" onclick="switchView('menu')">Back</button>
+          </div>
+        </div>
+
+        <!-- Screen 7: PIN Change -->
+        <div class="screen-view" id="view-pinchange">
+          <h3>CHANGE PIN CODE</h3>
+          <div class="custom-input-box">
+            <label>Enter New 4-Digit PIN:</label>
+            <input type="password" id="newPinInput" maxlength="4" placeholder="****" readonly>
+          </div>
+          <div class="screen-actions">
+            <button class="action-btn back" onclick="switchView('menu')">Back</button>
+            <button class="action-btn confirm" onclick="processPinChange()">Update</button>
+          </div>
+        </div>
+
+        <!-- Screen 8: Dispensing Cash Animation -->
+        <div class="screen-view" id="view-dispensing">
+          <div class="loader-icon"><i class="fa-solid fa-spinner fa-spin"></i></div>
+          <h3>PROCESSING TRANSACTION...</h3>
+          <p>Please wait while we process your request.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ATM Keypad & Hardware Controls -->
+    <div class="hardware-panel">
+      <!-- Physical Cash Dispenser Slot -->
+      <div class="cash-dispenser">
+        <div class="slot-opening"></div>
+        <div class="cash-note" id="cashNote">💵 CASH DISPENSED</div>
+      </div>
+
+      <!-- Numeric Keypad -->
+      <div class="keypad-grid">
+        <button class="num-key" onclick="pressKey('1')">1</button>
+        <button class="num-key" onclick="pressKey('2')">2</button>
+        <button class="num-key" onclick="pressKey('3')">3</button>
+        <button class="control-key cancel" onclick="pressCancel()">CANCEL</button>
+
+        <button class="num-key" onclick="pressKey('4')">4</button>
+        <button class="num-key" onclick="pressKey('5')">5</button>
+        <button class="num-key" onclick="pressKey('6')">6</button>
+        <button class="control-key clear" onclick="pressClear()">CLEAR</button>
+
+        <button class="num-key" onclick="pressKey('7')">7</button>
+        <button class="num-key" onclick="pressKey('8')">8</button>
+        <button class="num-key" onclick="pressKey('9')">9</button>
+        <button class="control-key enter" onclick="pressEnter()">ENTER</button>
+
+        <button class="num-key empty"></button>
+        <button class="num-key" onclick="pressKey('0')">0</button>
+        <button class="num-key empty"></button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
