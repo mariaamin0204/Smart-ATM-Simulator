@@ -3,7 +3,7 @@
 An interactive, responsive 3D ATM simulator built using HTML, CSS, JavaScript, and the Web Audio API to deliver a realistic banking terminal experience.
 
 ## 🚀 Live Demo
-[Click Here to View Live Project](https://your-atm-simulator-live-link.netlify.app)
+[Click Here to View Live Project](smart-atm-simulator.netlify.app)
 
 ## ✨ Key Features
 - 🔑 **PIN Authentication:** Realistic keypad interface with PIN validation.
